@@ -198,7 +198,6 @@ def _note_preprocess(susteins, notes):
     note_stream.sort(key= lambda x: x.start)
     return note_stream
 
-
 def encode_midi(file_path):
     events = []
     notes = []
@@ -208,8 +207,12 @@ def encode_midi(file_path):
         inst_notes = inst.notes
         # ctrl.number is the number of sustain control. If you want to know abour the number type of control,
         # see https://www.midi.org/specifications-old/item/table-3-control-change-messages-data-bytes-2
-        ctrls = _control_preprocess([ctrl for ctrl in inst.control_changes if ctrl.number == 64])
-        notes += _note_preprocess(ctrls, inst_notes)
+        ctrls_for_preprocessing = [ctrl for ctrl in inst.control_changes if ctrl.number == 64]
+        if len(ctrls_for_preprocessing) > 0:
+            ctrls = _control_preprocess(ctrls_for_preprocessing)
+            notes += _note_preprocess(ctrls, inst_notes)
+        else:
+            notes = inst_notes
 
     dnotes = _divide_note(notes)
 
@@ -259,4 +262,3 @@ if __name__ == '__main__':
     for i in ins.instruments:
         print(i.control_changes)
         print(i.notes)
-
